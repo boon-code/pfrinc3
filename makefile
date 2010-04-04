@@ -5,8 +5,8 @@ PACKET=$(NAME).sh
 SOURCE=$(NAME).py
 
 $(PACKET): $(SOURCE)
-  mkdir ./bin/
-  npyck -a $(SOURCE) ./cfg/config.txt -o ./bin/$(PACKET)
+	mkdir ./bin/
+	npyck -a $(SOURCE) ./cfg/config.txt -o ./bin/$(PACKET)
 
 all: $(TARGET)
 
@@ -14,14 +14,14 @@ all: $(TARGET)
 
 git-clean: clean
 #	rm -f *~ */*~
-  make clean
+	make clean
 	@find . -name \*~
 	find . -name \*~ -exec rm "{}" ";"
 	@find . -name \*.pyc
-	find . -name \*.pyc --exec rm "{}" ";"
+	find . -name \*.pyc -exec rm "{}" ";"
 
 clean:
 	rm -fr ./bin/
 
 test:
-  ./src/pfserver.py ./cfg/config.txt
+	./src/pfserver.py ./cfg/config.txt
