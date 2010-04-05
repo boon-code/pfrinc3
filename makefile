@@ -1,16 +1,16 @@
 
 include userconfig.mk
 
-PACKET=$(NAME).sh
-SOURCE=$(NAME).py
+PACKET=bin/$(NAME).sh
+SOURCE=src/$(NAME).py
 
 $(PACKET): $(SOURCE)
-	mkdir ./bin/
-	npyck -a $(SOURCE) ./cfg/config.txt -o ./bin/$(PACKET)
+	@mkdir -p bin/
+	npyck -a $(SOURCE) $(INCLUDE) -o $(PACKET)
 
-all: $(TARGET)
+all: $(PACKET)
 
-.PHONY: clean git-clean test
+.PHONY: clean git-clean run packet
 
 git-clean: clean
 #	rm -f *~ */*~
@@ -23,5 +23,8 @@ git-clean: clean
 clean:
 	rm -fr ./bin/
 
-test:
-	./src/pfserver.py ./cfg/config.txt
+run:
+	python $(SOURCE) $(ARGS)
+
+packet: $(PACKET)
+	sh $(PACKET)
