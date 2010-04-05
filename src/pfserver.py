@@ -22,20 +22,22 @@ class pfserver(object):
     
     def __init__(self, cfg_path):
         
-        if 'NPYCK_' in dir():
+        print globals()
+        if 'NPYCK_' in globals():
             self._npyck = True
         else:
             self._npyck = False
         
         self._cfg = self.__loadconfig(cfg_path)
-        self._det = pfdetainer.mem_detainer()
-        self._info = pfinfo.info_server(INFO_PORT)
-        self._man = pfmanager.manager(self._cfg, self._det, self._info)
         
         self._cmd_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self._cmd_sock.bind(('', CMD_PORT))
         self._cmd_sock.listen(100)
         self._cmd_sock.settimeout(pfutil.DEFAULT_SOCKET_TIMEOUT)
+        
+        self._det = pfdetainer.mem_detainer()
+        self._info = pfinfo.info_server(INFO_PORT)
+        self._man = pfmanager.manager(self._cfg, self._det, self._info)
         
         self._running = True
     
@@ -150,7 +152,7 @@ class pfserver(object):
 def main(args):
     "The main entry-point."
     
-    path = "config"
+    path = "config.txt"
     if len(args) > 0:
         path = args[0]
     
