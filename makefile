@@ -8,7 +8,7 @@ OBJS=$(SRCS:.py=.notabs)
 
 $(PACKET): $(MAIN)
 	@mkdir -p bin/
-	npyck -a $(MAIN) $(INCLUDE) -o $(PACKET)
+	npyck $(MAIN) $(SRCS) $(INCLUDE) -o $(PACKET)
 
 all: $(PACKET)
 

@@ -22,8 +22,6 @@ class pfserver(object):
     
     def __init__(self, cfg_path):
         
-        self._info = pfinfo.info_server(INFO_PORT)
-        
         if 'NPYCK_' in dir():
             self._npyck = True
         else:
@@ -31,6 +29,7 @@ class pfserver(object):
         
         self._cfg = self.__loadconfig(cfg_path)
         self._det = pfdetainer.mem_detainer()
+        self._info = pfinfo.info_server(INFO_PORT)
         self._man = pfmanager.manager(self._cfg, self._det, self._info)
         
         self._cmd_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
