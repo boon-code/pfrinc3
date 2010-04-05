@@ -3,6 +3,8 @@ include userconfig.mk
 
 PACKET=bin/$(NAME).sh
 MAIN=src/$(NAME).py
+SRCS=$(wildcard src/*.py)
+OBJS=$(SRCS:.py=.notabs)
 
 $(PACKET): $(MAIN)
 	@mkdir -p bin/
@@ -19,13 +21,15 @@ git-clean: clean
 	@find . -name \*.pyc
 	find . -name \*.pyc -exec rm "{}" ";"
 
-expand:
-	expand --tabs=4 $(MAIN) >make.tmp
-	cp make.tmp $(MAIN)
-	rm make.tmp
+%.notabs : %.py
+	expand --tabs=4 $< > $@
+	cp $@ $<
+
+expand: $(OBJS)
 
 clean:
 	rm -fr ./bin/
+	rm -f ./src/*.pyc ./src/*.notabs
 
 run:
 	python $(MAIN) $(ARGS)
