@@ -2,29 +2,33 @@
 include userconfig.mk
 
 PACKET=bin/$(NAME).sh
-SOURCE=src/$(NAME).py
+MAIN=src/$(NAME).py
 
-$(PACKET): $(SOURCE)
+$(PACKET): $(MAIN)
 	@mkdir -p bin/
-	npyck -a $(SOURCE) $(INCLUDE) -o $(PACKET)
+	npyck -a $(MAIN) $(INCLUDE) -o $(PACKET)
 
 all: $(PACKET)
 
-.PHONY: clean git-clean run packet
+.PHONY: clean git-clean run packet expand
 
 git-clean: clean
 #	rm -f *~ */*~
-	make clean
 	@find . -name \*~
 	find . -name \*~ -exec rm "{}" ";"
 	@find . -name \*.pyc
 	find . -name \*.pyc -exec rm "{}" ";"
 
+expand:
+	expand --tabs=4 $(MAIN) >make.tmp
+	cp make.tmp $(MAIN)
+	rm make.tmp
+
 clean:
 	rm -fr ./bin/
 
 run:
-	python $(SOURCE) $(ARGS)
+	python $(MAIN) $(ARGS)
 
 packet: $(PACKET)
 	sh $(PACKET)
