@@ -67,7 +67,7 @@ class pfserver(object):
         self._cmd_sock.listen(100)
         self._cmd_sock.settimeout(ACCEPT_LOOP_TIMEOUT)
         
-        self._det = pfdetainer.mem_detainer()
+        self._det = pfdetainer.file_detainer(self._cfg['cfg'])
         
         self._log.info("creating info server")
         self._info = pfinfo.info_server(INFO_PORT)
@@ -112,7 +112,7 @@ class pfserver(object):
             data = f.read()
             f.close()
         
-        cfg['rapidshare'] = data
+        cfg['rapid-share'] = data
         
         return cfg
     
@@ -154,7 +154,9 @@ class pfserver(object):
             if pos >= 0:
                 data = buffer[0:pos].split(' ', 1)
                 if data[0] == 'add':
-                    link_count = self._man.padd(data[1].split(' '))
+                    links = data[1].split(' ')
+                    links = pfutil.resolve_links(links)
+                    link_count = self._man.padd(links)
                     conn.send("added %d links" % link_count)
                 elif data[0] == 'start':
                     if self._man.pstart(data[1]):

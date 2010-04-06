@@ -5,7 +5,7 @@ import re
 import os
 import time
 import curl
-import pfutil
+import pfextractor
 import curl
 
 UPDATE_INTERVAL = 0.5
@@ -232,7 +232,7 @@ class pf_packet(object):
         finally:
             self._lock.release()
             
-        extr_obj = pfutil.extractor(source, dest, pwds)
+        extr_obj = pfextractor.extractor(source, dest, pwds)
          
         result = extr_obj.extract(self._firstfile, proc = self.__update_extractor)
         

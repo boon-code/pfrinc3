@@ -5,8 +5,6 @@ import re
 # BAD: on windows this wouldn't be possible
 import os
 import time
-import subprocess
-import unrar
 import curl
 
 DEFAULT_SOCKET_TIMEOUT = 0.5
@@ -19,34 +17,7 @@ PACKET_NAME_RE = re.compile(".*/([^/]*)[.]{1}part\\d+[.]{1}rar")
 PACKET_NAME_SIMPLE_RE = re.compile(".*/([^/]*)[.]{1}rar")
 FILENAME_RE = re.compile(".*/([^/]*)")
 
-def mklist(*elements):
-    return elements
-
-class extractor(object):
-    
-    def __init__(self, source, dest, pwds):
-        "Creates and configures an extractor-object"
-        
-        self._to = dest
-        self._from = source
-        self._pwd = pwds
-    
-    def extract(self, filename, proc=None):
-        "Starts extractor-utility and extracts packets."
-        
-        file_path = os.path.join(self._from, filename)
-        
-        for pwd in self._pwd:
-            unr = unrar.unrar(file_path, self._to, pwd)
-            unr.update_loop(callback=proc)
-            
-            if unr.update()[unrar.STATUS_OK]:
-                return True
-        
-        return False
-
-
-def scanlinks(data):
+def resolve_links(links):
     "Scans data and finds links, converts them to rapidshare-links."
     
     def __sjdecode(link):
@@ -79,55 +50,22 @@ def scanlinks(data):
         link_end = os.path.join(path[0], 'dl', path[1])
         link = "".join(("http://", item.group(1), link_end))
         return link
+    
+    resolved_links = []
         
-    lsf = LINK_FINDER_RE.findall(data)
-    links = []
-        
-    for i in lsf:
-        link = "".join(i)
-        if i[0] == "download.serienjunkies.org":
+    for link in links:
+        if link.startswith("http://download.serienjunkies.org"):
             link = __sjdecode(link)
             link = __rsdecode(link)
             if link != '':
-                links.append(link)
+                resolved_links.append(link)
                 
-        elif i[0] == "rapidshare.com":
+        elif link.startswith("http://rapidshare.com"):
             link = __rsdecode(link)
             if link != '':
-                links.append(link)
+                resolved_links.append(link)
         
-    return links
-
-def loadconfig(path):
-    
-    f = open(path, 'r')
-    cfg = {}
-    
-    for line in f:
-        line = line.rstrip('\n')
-        line = line.rstrip('\r')
-        if line.startswith('from'):
-            cfg['from'] = line.lstrip('from').strip(' ')
-        elif line.startswith('to'):
-            cfg['to'] = line.lstrip('to').strip(' ')
-        elif line.startswith('pwd'):
-            cfg['pwd'] = line.lstrip('pwd').strip(' ').split(' ')
-        elif line.startswith('work'):
-            cfg['work'] = line.lstrip('work').strip(' ')
-        elif line.startswith('cfg'):
-            cfg['cfg'] = line.lstrip('cfg').strip(' ')
-        
-    cfg['rapid-share'] = os.path.join(cfg['cfg'], 
-            "rapidshare-cookie")
-    
-    cfg['extractor'] = os.path.join(cfg['work'], "extractor")
-    
-    cfg['last-links-file'] = os.path.join(cfg['cfg'], "last-links")
-    
-    cfg['finished-file'] = os.path.join(cfg['cfg'], "finished-packets")
-    
-    f.close()
-    return cfg
+    return resolved_links
 
 def shutdown():
     args = ['smbstatus', '--locks']
