@@ -5,6 +5,7 @@ DEBUG_ = True
 import socket
 import sys
 import os
+import logging
 import pfutil
 import pfpacket
 import pfinfo
@@ -12,17 +13,41 @@ import pfutil
 import pfmanager
 import pfdetainer
 
+LOGGER_NAME = 'pf-server'
+
+import __main__
+if 'DEBUG_' in dir(__main__):
+    __main__.LOG_LEVEL_ = logging.DEBUG
+else:
+    DEBUG_ = False
+
+if 'LOG_LEVEL_' in dir(__main__):
+    log = logging.getLogger(LOGGER_NAME)
+    log.setLevel(__main__.LOG_LEVEL_)
+    if len(log.handlers) <= 0:
+        st_log = logging.StreamHandler(sys.stderr)
+        st_log.setFormatter(
+            logging.Formatter("%(name)s : %(threadName)s : %(levelname)s : %(message)s"))
+        log.addHandler(st_log)
+        del st_log
+    del log
+else:
+    log = logging.getLogger(LOGGER_NAME)
+    log.setLevel(logging.CRITICAL)
+
+
 CMD_PORT = 10030
 INFO_PORT = CMD_PORT + 1
 UPDATE_INTERVAL = 1
 HISTORY_SIZE = 20
-DEFAULT_BLOCK_TIME = 5.0
+ACCEPT_LOOP_TIMEOUT = 1.0
+USER_TIMEOUT = 8.0
+RECV_SIZE = 1
 
 class pfserver(object):
     
     def __init__(self, cfg_path):
         
-        print globals()
         if 'NPYCK_' in globals():
             self._npyck = True
         else:
@@ -33,7 +58,7 @@ class pfserver(object):
         self._cmd_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self._cmd_sock.bind(('', CMD_PORT))
         self._cmd_sock.listen(100)
-        self._cmd_sock.settimeout(pfutil.DEFAULT_SOCKET_TIMEOUT)
+        self._cmd_sock.settimeout(ACCEPT_LOOP_TIMEOUT)
         
         self._det = pfdetainer.mem_detainer()
         self._info = pfinfo.info_server(INFO_PORT)
@@ -86,11 +111,20 @@ class pfserver(object):
         while self._running:
             try:
                 conn, address = self._cmd_sock.accept()
-                conn.setblocking(DEFAULT_BLOCK_TIME)
-                
-                self.__recvcmd(conn)
+                conn.settimeout(USER_TIMEOUT)
+                try:
+                    self.__recvcmd(conn)
+                except socket.timeout:
+                    conn.send("connection timeout")
+                finally:
+                    conn.close()
             except socket.timeout:
                 pass
+            except BaseException, ex:
+                self._cmd_sock.close()
+                self._man.kill()
+                self._running = False
+                raise ex
         
         self._cmd_sock.close()
         self._man.kill()
@@ -99,13 +133,11 @@ class pfserver(object):
     def __recvcmd(self, conn):
         
         buffer = ''
-        while 1:
-            recv_buffer = conn.recv(pfutil.DEFAULT_RECV_SIZE)
+        recv_buffer = conn.recv(RECV_SIZE)
+        while recv_buffer != '':
             buffer += recv_buffer
             pos = buffer.find('\n\n')
-            if recv_buffer == '':
-                return
-            elif pos >= 0:
+            if pos >= 0:
                 data = buffer[0:pos].split(' ', 1)
                 if data[0] == 'add':
                     link_count = self._man.padd(data[1].split(' '))
@@ -144,9 +176,12 @@ class pfserver(object):
                     conn.send(lt)
                 else:
                     conn.send("wrong cmd")
-                
-                conn.close()
                 return
+                
+            else:
+                recv_buffer = conn.recv(RECV_SIZE)
+                
+        return
 
 
 def main(args):
