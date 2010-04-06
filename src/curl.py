@@ -41,7 +41,7 @@ def simple_download(link, *args):
     
     args = mklist('curl', link, *args)
     print args
-    subp = subprocess.Popen(args, stdout = subprocess.PIPE)
+    subp = subprocess.Popen(args, stdout=subprocess.PIPE)
     return subp.communicate()[0]
 
 class curl(object):
@@ -56,7 +56,7 @@ class curl(object):
     with some threading.RLock() ...
     """
     
-    def __init__(self, link, dest, args = [], cookie = None):
+    def __init__(self, link, dest, args=[], cookie=None):
         """ __init__(self, link, dest, *args)
         This constructor starts downloading link and safes it to 
         dest (file). Args will be passed to curl tool.
@@ -68,7 +68,7 @@ class curl(object):
         
         if cookie is None:
             args = mklist('curl', link, '-o', dest, *args)
-            self._sproc = subprocess.Popen(args, stderr = subprocess.PIPE)
+            self._sproc = subprocess.Popen(args, stderr=subprocess.PIPE)
         else:
             args = mklist('curl', link, '-o', dest, "--cookie", "-", *args)
             self._sproc = subprocess.Popen(args, stderr = subprocess.PIPE,
@@ -95,8 +95,8 @@ class curl(object):
         
         
             
-    def update(self, waittime = None):
-        """ update(self, waittime = None)
+    def update(self, waittime=None):
+        """ update(self, waittime=None)
         Here you can see the progress. waittime defines an additional wait
         time. None means don't wait.
         
@@ -133,8 +133,8 @@ class curl(object):
         
         return copy.copy(self._status)
     
-    def update_loop(self, callback = None, waittime = DEFAULT_WAITTIME):
-        """ update_loop(self, callback = None)
+    def update_loop(self, callback=None, waittime=DEFAULT_WAITTIME):
+        """ update_loop(self, callback=None, waittime=DEFAULT_WAITTIME)
         This function blocks till curl has finished, it repeatedly calls
         callback if it's not None.
         """

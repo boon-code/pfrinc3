@@ -110,7 +110,7 @@ class info_server(object):
             self._lock.release()
         
     
-    def update_status(self, packet_stats, force = False):
+    def update_status(self, packet_stats, force=False):
         "updates current buffer."
         
         

@@ -97,7 +97,7 @@ class mem_detainer(object):
         
         return False
     
-    def get_finished(self, count = None):
+    def get_finished(self, count=None):
         
         self._lock.acquire()
         try:
@@ -127,8 +127,8 @@ class mem_detainer(object):
 
 class file_detainer(object):
     
-    def __init__(self, path, fin_name = "finished-packet",
-        bak_name = "backup", auto_sync = True):
+    def __init__(self, path, fin_name="finished-packet",
+        bak_name="backup", auto_sync=True):
         
         self._fin = os.path.join(path, fin_name)
         self._bak = os.path.join(path, bak_name)
@@ -253,7 +253,7 @@ class file_detainer(object):
             % (name, self._fin))
         return False
     
-    def get_finished(self, count = None):
+    def get_finished(self, count=None):
         
         self.sync()
         

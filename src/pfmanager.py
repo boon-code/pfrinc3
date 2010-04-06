@@ -35,7 +35,7 @@ else:
 
 class manager(object):
     
-    def __init__(self, config, detainer, info = None):
+    def __init__(self, config, detainer, info=None):
         
         self._running = True
         self._packets = []
@@ -60,7 +60,7 @@ class manager(object):
         for i in self._worker:
             i.start()
     
-    def __update_info(self, force = False):
+    def update_info(self, force=False):
         
         if not self._info is None:
             
@@ -75,7 +75,7 @@ class manager(object):
             for i in packets:
                 pack_stat.append(i.status())
             
-            self._info.update_status(pack_stat, force = force)
+            self._info.update_status(pack_stat, force=force)
     
     def __add_link(self, link):
         "Only used by 'add' to add just one link to the list."
@@ -103,7 +103,7 @@ class manager(object):
                     break
             
             if pack is None:
-                pack = pfpacket.pf_packet(name, repeated = was_downloaded)
+                pack = pfpacket.pf_packet(name, repeated=was_downloaded)
                 self._packets.append(pack)
         finally:
             self._lock.release()
@@ -121,7 +121,7 @@ class manager(object):
                 self._detainer.added(link)
                 count += 1
         
-        self.__update_info()
+        self.update_info()
         
         # save often to ensure that unfinished links are saved
         # in case of shutdown
@@ -198,13 +198,13 @@ class manager(object):
         return result
     
     
-    def preset(self, packet_name, force = False):
+    def preset(self, packet_name, force=False):
         
         result = False
         packet = self.__find_packet(packet_name)
         
         if not (packet is None):
-            result = packet.reset(force = force)
+            result = packet.reset(force=force)
         
         if result:
             self._log.debug("reset packet %s successfully" % packet_name)
@@ -253,13 +253,7 @@ class manager(object):
         finally:
             self._lock.release()
         
-        f=open(rs_cookie, "r")
-        cook = f.read()
-        f.close()
-        
-        self._log.debug("cookie: %s", cook)
-        
-        pack.download(src, cook)
+        pack.download(src, rs_cookie)
         pack.extract(src, dest, pwds)
         
         pack_name = pack.get_name()
@@ -273,7 +267,7 @@ class manager(object):
         run = True
         
         while run:
-            self.__update_info()
+            self.update_info()
             time.sleep(pfutil.UPDATE_INTERVAL)
             
             self._lock.acquire()

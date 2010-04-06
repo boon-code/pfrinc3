@@ -61,8 +61,8 @@ class unrar(object):
         self._line = ''
         
         args = mklist("unrar", "-ierr", "e", "-o+", '-p' + pwd, filepath)
-        self._sproc = subprocess.Popen(args, stderr = subprocess.PIPE,
-            cwd = dst_dir)
+        self._sproc = subprocess.Popen(args, stderr=subprocess.PIPE,
+            cwd=dst_dir)
     
     def __read_line(self):
         
@@ -85,7 +85,7 @@ class unrar(object):
             else:
                 return False
     
-    def update(self, waittime = None):
+    def update(self, waittime=None):
         """ update(self, waittime = None)
         Here you can see the progress. waittime defines an additional wait
         time. None means don't wait.
@@ -159,7 +159,7 @@ class unrar(object):
             self._status[STATUS_MSG] = ("crc error or wrong pwd in %s " %
                 self._err_crc)
     
-    def update_loop(self, callback = None, waittime = DEFAULT_WAITTIME):
+    def update_loop(self, callback=None, waittime=DEFAULT_WAITTIME):
         """ update_loop(self, callback = None, timeout = None)
         This function blocks till unrar has finished, it repeatedly calls
         callback if it's not None.

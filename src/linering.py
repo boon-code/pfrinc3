@@ -5,7 +5,7 @@ DEFAULT_SIZE = 100
 class lring(object):
     "Not thread-safe ring buffer"
     
-    def __init__(self, size = DEFAULT_SIZE):
+    def __init__(self, size=DEFAULT_SIZE):
         
         self._lines = ['' for i in range(size)]
         self._position = 0

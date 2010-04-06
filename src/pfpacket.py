@@ -25,7 +25,7 @@ def mklist(*elements):
 
 class pf_packet(object):
     
-    def __init__(self, name, repeated = False):
+    def __init__(self, name, repeated=False):
         "Initialize packet - struct."
         
         self._name = name
@@ -99,7 +99,7 @@ class pf_packet(object):
         finally:
             self._lock.release()
     
-    def reset(self, force = False):
+    def reset(self, force=False):
         "Just resets status to default..."
         
         self._lock.acquire()
@@ -169,7 +169,7 @@ class pf_packet(object):
                 filename = FILENAME_RE.search(link).group(1)
                 dest = os.path.join(dl_dir, filename)
                 
-                dl = curl.curl(link, dest, cookie = cookie, args = curl_param)
+                dl = curl.curl(link, dest, cookie=cookie, args=curl_param)
                 status = dl.update()
                 
                 while status[curl.STATUS_RUNNING]:
