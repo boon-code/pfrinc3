@@ -35,7 +35,7 @@ else:
 
 class manager(object):
     
-    def __init__(self, config, detainer, info=None):
+    def __init__(self, config, detainer, info=None, load_pending=True):
         
         self._running = True
         self._packets = []
@@ -47,6 +47,10 @@ class manager(object):
         self._cmds = Queue.Queue()
         self._worker = []
         self._info_thread = None
+        
+        if load_pending:
+            for link in self._detainer.get_pending():
+                self.__add_link(link)
         
         if not (info is None):
             self._info_thread = threading.Thread(
@@ -108,6 +112,9 @@ class manager(object):
         finally:
             self._lock.release()
         
+        if not was_downloaded:
+            self._detainer.added(link)
+        
         pack.add(link) # now its outside the locked block...
         return True
     
@@ -118,7 +125,6 @@ class manager(object):
         
         for link in links:
             if self.__add_link(link):
-                self._detainer.added(link)
                 count += 1
         
         self.update_info()

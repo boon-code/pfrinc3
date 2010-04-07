@@ -174,8 +174,8 @@ class unrar(object):
                         callback(status)
                     except kill_except.KillException:
                         self.kill()
-                        return None
-                    except:
+                        return
+                    except TypeError:
                         print "callback failed"
             else:
                 if self._sproc.poll() is None:

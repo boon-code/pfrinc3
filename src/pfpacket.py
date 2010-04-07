@@ -7,6 +7,7 @@ import time
 import curl
 import pfextractor
 import curl
+import kill_except
 
 UPDATE_INTERVAL = 0.5
 FILENAME_RE = re.compile(".*/([^/]*)")
@@ -79,7 +80,7 @@ class pf_packet(object):
             text += (", status: %s}" % self._status)
             
             if not self._run:
-                text = "killed packet must be reset..."
+                text += " killed packet must be reset..."
             
         finally:
             self._lock.release()
@@ -111,12 +112,10 @@ class pf_packet(object):
                 self._dl_links = Queue.Queue()
                 
                 if force:
-                    self._dl_count = len(self._successful_links)
-                else:
-                    self._dl_count = 0
-                
-                if force:
                     self._successful_links = []
+                    self._dl_count = 0
+                else:
+                    self._dl_count = len(self._successful_links)
                 
                 for link in self._links:
                     if not (link in self._successful_links):
@@ -159,7 +158,6 @@ class pf_packet(object):
             else:
                 self._status = LOADING
                 self._msg = None
-                self._dl_count = 0
         finally:
             self._lock.release()
         

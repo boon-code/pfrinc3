@@ -168,6 +168,11 @@ class pfserver(object):
                         conn.send("resetted %s" % data[1])
                     else:
                         conn.send("resetting %s failed" % data[1])
+                elif data[0] == 'kill':
+                    if self._man.pkill(data[1]):
+                        conn.send("killed %s" % data[1])
+                    else:
+                        conn.send("killing %s failed" % data[1])
                 elif data[0] == 'exit-force-bad':
                     conn.send("failed, not implemented")
                 elif data[0] == 'shutdown':
