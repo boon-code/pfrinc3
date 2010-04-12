@@ -65,17 +65,21 @@ class manager(object):
         for i in self._worker:
             i.start()
     
+    def get_packets(self):
+        
+        self._lock.acquire()
+        try:
+            packets = copy.copy(self._packets)
+        finally:
+            self._lock.release()
+        
+        return packets
+    
     def update_info(self, force=False):
         
         if not self._info is None:
             
-            self._lock.acquire()
-            try:
-                packets = copy.copy(self._packets)
-            finally:
-                self._lock.release()
-            
-            self._info.update_status(packets, force=force)
+            self._info.update_status(self.get_packets(), force=force)
     
     def __add_link(self, link):
         "Only used by 'add' to add just one link to the list."
