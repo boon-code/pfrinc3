@@ -8,7 +8,6 @@ import pfutil
 import linering
 import logging
 import pfpacket
-import pfinfo
 import copy
 
 LOGGER_NAME = 'pf-manager'
