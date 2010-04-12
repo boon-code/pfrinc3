@@ -31,6 +31,7 @@ else:
 
 DEFAULT_SOCKET_TIMEOUT = 0.5
 DEFAULT_TIMEOUT = 1.0
+BIND_WAITTIME = 60.0
 
 class info_server(object):
     
@@ -46,9 +47,9 @@ class info_server(object):
         
         self._clients = []
         self._old_status = ""
-        self._accept_thread = threading.Thread(target = self.__accept,
-            args = (port,))
-        self._msg_thread = threading.Thread(target = self.__msg)
+        self._accept_thread = threading.Thread(target=self.__accept,
+            args=(port,))
+        self._msg_thread = threading.Thread(target=self.__msg)
         
         self._log.info("starting accept-thread...")
         self._accept_thread.start()
@@ -88,7 +89,7 @@ class info_server(object):
                 try:
                     for client in self._clients:
                         try:
-                            client.send(msg)
+                            client.sendall(msg)
                         except socket.error:
                             dead_clients.append(client.getsockname())
                             self._clients.remove(client)
@@ -110,13 +111,13 @@ class info_server(object):
             self._lock.release()
         
     
-    def update_status(self, packet_stats, force=False):
+    def update_status(self, packets, force=False):
         "updates current buffer."
         
         
         buffer = ""
-        for i in packet_stats:
-            buffer += (i + '\n')
+        for i in packets:
+            buffer += "".join((i.get_name(), ' ', i.status(), '\n'))
         
         buffer = self.__correct_msg(buffer)
     
@@ -136,7 +137,16 @@ class info_server(object):
         "This loop accepts new connections."
         
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        sock.bind(('', port))
+        
+        try:
+            sock.bind(('', port))
+        except:
+            self._log.warning("socket.bind failed (retrying once) %s" % 
+                traceback.format_exc())
+            time.sleep(BIND_WAITTIME)
+            sock.bind(('', port))
+            self._log.info("now bind worked...")
+        
         sock.listen(100)
         sock.settimeout(DEFAULT_SOCKET_TIMEOUT)
         

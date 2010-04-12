@@ -35,7 +35,8 @@ else:
 
 class manager(object):
     
-    def __init__(self, config, detainer, info=None, load_pending=True):
+    def __init__(self, config, detainer, info=None, load_pending=True, 
+        use_info_thread=False):
         
         self._running = True
         self._packets = []
@@ -52,14 +53,14 @@ class manager(object):
             for link in self._detainer.get_pending():
                 self.__add_link(link)
         
-        if not (info is None):
+        if (not (info is None)) and use_info_thread:
             self._info_thread = threading.Thread(
-                target = self.__info_loop, name = "Info-Thread")
+                target=self.__info_loop, name="Info-Thread")
             self._info_thread.start()
         
         for i in xrange(2):
-            self._worker.append(threading.Thread(target = self.__workloop,
-                name = "Worker-%d" % i))
+            self._worker.append(threading.Thread(target=self.__workloop,
+                name=("Worker-%d" % i)))
         
         for i in self._worker:
             i.start()
@@ -74,12 +75,7 @@ class manager(object):
             finally:
                 self._lock.release()
             
-            pack_stat = []
-        
-            for i in packets:
-                pack_stat.append(i.status())
-            
-            self._info.update_status(pack_stat, force=force)
+            self._info.update_status(packets, force=force)
     
     def __add_link(self, link):
         "Only used by 'add' to add just one link to the list."
@@ -233,7 +229,7 @@ class manager(object):
                 finally:
                     self._lock.release()
                 
-                cmd = self._cmds.get(timeout = 1)
+                cmd = self._cmds.get(timeout=1)
                 if cmd[0] == 'start':
                     pack = cmd[1]
                     self.__work(pack)
@@ -265,7 +261,10 @@ class manager(object):
         pack_name = pack.get_name()
         
         if pack.is_finished():
+            self._log.debug("finished packet %s" % pack_name)
             self._detainer.finished(pack_name)
+        else:
+            self._log.info("packet %s failed" % pack_name)
     
     
     def __info_loop(self):
@@ -305,8 +304,11 @@ class manager(object):
             i.join()
         
         if not (self._info is None):
-            self._log.info("waiting for info-thread to terminate...")
-            self._info_thread.join()
+            
+            if not (self._info_thread is None):
+                self._log.info("waiting for info-thread to terminate...")
+                self._info_thread.join()
+            
             self._log.info("killing info-server...")
             self._info.kill()
         
