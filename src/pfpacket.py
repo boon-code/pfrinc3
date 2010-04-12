@@ -11,6 +11,7 @@ import kill_except
 
 UPDATE_INTERVAL = 0.5
 FILENAME_RE = re.compile(".*/([^/]*)")
+EXCEED_MSG = 'You have exceeded the download limit.'
 
 INIT = 'none'
 WAITING = 'wait'
@@ -149,11 +150,27 @@ class pf_packet(object):
         finally:
             self._lock.release()
     
+    def __has_exceeded(self, filepath):
+        
+        if os.stat(filepath).st_size < 1000000:
+            f = open(filepath)
+            try:
+                data = f.read()
+                if data.find(EXCEED_MSG) >= 0:
+                    return True
+            finally:
+                f.close()
+        
+        return False
+                
+    
     def download(self, dl_dir, cookie, *curl_param):
         
         self._lock.acquire()
         try:
-            if self._status in (KILLED, LOADING, EXTRACTING, FINISHED):
+            if self._status in (KILLED, LOADING, 
+                EXTRACTING, FINISHED, ERROR):
+                
                 return False
             else:
                 self._status = LOADING
@@ -163,7 +180,7 @@ class pf_packet(object):
         
         try:
             while 1:
-                link = self._dl_links.get(timeout = 0)
+                link = self._dl_links.get(timeout=0)
                 filename = FILENAME_RE.search(link).group(1)
                 dest = os.path.join(dl_dir, filename)
                 
@@ -189,6 +206,11 @@ class pf_packet(object):
                         return False
                     
                     time.sleep(UPDATE_INTERVAL)
+                
+                if self.__has_exceeded(dest):
+                    self._status = ERROR
+                    self._msg = "Maybe exceeded the daily limit..."
+                    return False
                 
                 if status[curl.STATUS_RETURN] == 0:
                     self._successful_links.append(link)
@@ -222,7 +244,9 @@ class pf_packet(object):
         
         self._lock.acquire()
         try:
-            if self._status in (KILLED, LOADING, EXTRACTING, FINISHED):
+            if self._status in (KILLED, LOADING,
+                 EXTRACTING, FINISHED, ERROR):
+                
                 return False
             else:
                 self._status = EXTRACTING
