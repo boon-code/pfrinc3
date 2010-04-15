@@ -127,14 +127,14 @@ class mem_detainer(object):
 
 class file_detainer(object):
     
-    def __init__(self, path, fin_name="finished-packet",
-        bak_name="backup", auto_sync=True):
+    def __init__(self, path, fin_name='finished-packet',
+        bak_name='backup', auto_sync_count=AUTO_SYNC_COUNT):
         
         self._fin = os.path.join(path, fin_name)
         self._bak = os.path.join(path, bak_name)
         self._log = logging.getLogger(LOGGER_NAME)
         self._lock = threading.RLock()
-        self._auto = auto_sync
+        self._async_count = auto_sync_count
         
         self._pending = []
         self._finished = []
@@ -153,7 +153,7 @@ class file_detainer(object):
         finally:
             self._lock.release()
         
-        if link_count >= AUTO_SYNC_COUNT:
+        if link_count >= self._async_count:
             self.sync()
         
     def finished(self, name):
@@ -186,7 +186,7 @@ class file_detainer(object):
             self._log.debug("didn't find name (%s) in pending list..."
                 % name)
         
-        if packet_count >= AUTO_SYNC_COUNT:
+        if packet_count >= self._async_count:
             self.sync()
     
     def sync(self):

@@ -77,7 +77,8 @@ class pfserver(object):
         self._cmd_sock.listen(100)
         self._cmd_sock.settimeout(ACCEPT_LOOP_TIMEOUT)
         
-        self._det = pfdetainer.file_detainer(self._cfg['cfg'])
+        self._det = pfdetainer.file_detainer(self._cfg['cfg'],
+            auto_sync_count = 1)
         
         self._log.info("creating info server")
         self._info = pfinfo.info_server(INFO_PORT)
