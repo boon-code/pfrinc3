@@ -256,7 +256,7 @@ class pf_packet(object):
             
         extr_obj = pfextractor.extractor(source, dest, pwds)
          
-        result = extr_obj.extract(self._firstfile, proc = self.__update_extractor)
+        result = extr_obj.extract(self._firstfile, proc=self.__update_extractor)
         
         self._lock.acquire()
         try:
