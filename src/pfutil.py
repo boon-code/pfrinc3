@@ -5,6 +5,7 @@ import re
 # BAD: on windows this wouldn't be possible
 import os
 import time
+import subprocess
 import curl
 
 DEFAULT_SOCKET_TIMEOUT = 0.5
@@ -69,12 +70,12 @@ def resolve_links(links):
 
 def shutdown():
     args = ['smbstatus', '--locks']
-    subp = subprocess.Popen(args, stdout = subprocess.PIPE)
+    subp = subprocess.Popen(args, stdout=subprocess.PIPE)
     result = subp.communicate()[0]
     
     if result.find("Locked files") < 0:
         args = ['gnome-power-cmd.sh', 'shutdown']
-        subp = subprocess.Popen(args, stdout = subprocess.PIPE)
+        subp = subprocess.Popen(args, stdout=subprocess.PIPE)
         result = subp.communicate()[0]
         return "init shutdown: " + result
     else:
@@ -83,6 +84,6 @@ def shutdown():
 def just_shutdown():
     
     args = ['gnome-power-cmd.sh', 'shutdown']
-    subp = subprocess.Popen(args, stdout = subprocess.PIPE)
+    subp = subprocess.Popen(args, stdout=subprocess.PIPE)
     result = subp.communicate()[0]
     return "init shutdown: " + result
