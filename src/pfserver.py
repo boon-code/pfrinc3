@@ -188,7 +188,7 @@ class pfserver(object):
                 elif data[0] == 'exit-force-bad':
                     conn.sendall("failed, not implemented")
                 elif data[0] == 'shutdown':
-                    result = pfutil.shutdown()
+                    result = pfutil.just_shutdown()
                     if result:
                         conn.sendall(result)
                 elif data[0] == 'exit':

@@ -79,3 +79,10 @@ def shutdown():
         return "init shutdown: " + result
     else:
         return ("failed because of locked files\n%s\n" % result)
+
+def just_shutdown():
+    
+    args = ['gnome-power-cmd.sh', 'shutdown']
+    subp = subprocess.Popen(args, stdout = subprocess.PIPE)
+    result = subp.communicate()[0]
+    return "init shutdown: " + result
