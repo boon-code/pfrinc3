@@ -83,7 +83,11 @@ def shutdown():
 
 def just_shutdown():
     
-    args = ['gnome-power-cmd.sh', 'shutdown']
-    subp = subprocess.Popen(args, stdout=subprocess.PIPE)
-    result = subp.communicate()[0]
+    #args = ['gnome-power-cmd.sh', 'shutdown']
+    args = ['dbus-send', '--print-reply', '--system',
+    '--dest=org.freedesktop.Hal', '/org/freedesktop/Hal/devices/computer',
+    'org.freedesktop.Hal.Device.SystemPowerManagement.Shutdown']
+    
+    subp = subprocess.Popen(args, stderr=subprocess.PIPE)
+    result = subp.communicate()[1]
     return "init shutdown: " + result

@@ -5,6 +5,7 @@ import time
 import copy
 import logging
 import sys
+import traceback
 
 LOGGER_NAME = 'pf-info'
 
